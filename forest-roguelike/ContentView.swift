@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import SpriteKit
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -15,33 +16,16 @@ struct ContentView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
         animation: .default)
     private var items: FetchedResults<Item>
+    
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-            Text("Select an item")
-        }
+        SKViewContainer()
+            .ignoresSafeArea()
     }
-
+    
+// MARK: Data
+    
+    //add item
     private func addItem() {
         withAnimation {
             let newItem = Item(context: viewContext)
@@ -58,6 +42,7 @@ struct ContentView: View {
         }
     }
 
+    //delete item
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             offsets.map { items[$0] }.forEach(viewContext.delete)
@@ -74,12 +59,30 @@ struct ContentView: View {
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
+// MARK: SpriteKit View Creation
+
+struct SKViewContainer: UIViewRepresentable {
+    
+    func makeUIView(context: Context) -> some UIView {
+        let view = SKView()
+        view.showsFPS = true
+        
+        let scene = GameScene()
+        scene.scaleMode = .resizeFill
+        
+        view.presentScene(scene)
+        
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIViewType, context: Context) {
+        
+    }
+    
+}
+
+
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
